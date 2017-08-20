@@ -85,10 +85,10 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="glsl.h" />
-    <ClInclude Include="glsl.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Shader.frag" />
+    <None Include="Shader.gs" />
     <None Include="Shader.vert" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

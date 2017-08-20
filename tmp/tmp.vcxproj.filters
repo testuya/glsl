@@ -26,9 +26,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="glsl.hpp">
-      <Filter>シェーダ</Filter>
-    </ClInclude>
     <ClInclude Include="glsl.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
@@ -38,6 +35,9 @@
       <Filter>シェーダ</Filter>
     </None>
     <None Include="Shader.frag">
+      <Filter>シェーダ</Filter>
+    </None>
+    <None Include="Shader.gs">
       <Filter>シェーダ</Filter>
     </None>
   </ItemGroup>
