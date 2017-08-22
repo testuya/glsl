@@ -54,10 +54,23 @@ void Glsl::shader_porocess(){
 	glShaderSource(fShaderId, 1, &fs, NULL);
 	glCompileShader(fShaderId);
 
+	//ジオメトリシェーダのコンパイル
+	GLuint gShaderId = glCreateShader(GL_GEOMETRY_SHADER);
+	std::string geometryShader;
+	read_shader("Shader.gs", geometryShader);
+	const char* gs = geometryShader.c_str();
+	glShaderSource(gShaderId, 1, &gs, NULL);
+	glCompileShader(gShaderId);
+
 	//プログラムオブジェクトの作成
 	GLuint programId = glCreateProgram();
 	glAttachShader(programId, vShaderId);
 	glAttachShader(programId, fShaderId);
+	glAttachShader(programId, gShaderId);
+
+	/*glProgramParameteriEXT(programId, GL_GEOMETRY_INPUT_TYPE_EXT, GL_LINES);
+	glProgramParameteriEXT(programId, GL_GEOMETRY_OUTPUT_TYPE_EXT, GL_LINES);
+	glProgramParameteriEXT(programId, GL_GEOMETRY_VERTICES_OUT_EXT, 10);*/
 
 	// リンク
 	GLint linked;
@@ -125,8 +138,8 @@ void Glsl::draw_line(float *position, int position_num, unsigned int *index, int
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexbuffer);
 	glEnableClientState(GL_VERTEX_ARRAY);
 
-	glVertexPointer(3, GL_FLOAT, 0, 0);
-	glDrawElements(GL_LINES, position_num, GL_UNSIGNED_INT, NULL);
+	glVertexPointer(3, GL_FLOAT, 0, 0); 
+	glDrawElements(GL_POINTS, position_num, GL_UNSIGNED_INT, NULL);
 	glDisableClientState(GL_VERTEX_ARRAY);	
 }
 
