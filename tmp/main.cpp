@@ -1,4 +1,3 @@
-#include <iostream>
 #include <GL/glew.h>
 #include <GL/wglew.h>
 #include <GL/glut.h>
@@ -16,29 +15,31 @@ int main(int argc, char *argv[]){
 
 	//データ
 	Glsl glsl;
+
 	float g_vertex_buffer_data[] = {
 		//1
-		0.0f, -1.0f, 0.0f,
-		-1.0f, 0.0f, 0.0f,
-		1.0f, 0.0f, 0.0f,
-		0.0f, 1.0f, 0.0f
-
+		0.5f, 0.9f, 0.0f,
+		0.4f, 0.6f, 0.0f,
+		0.5f, 0.2f, 0.0f,
+		0.4f, -0.2f, 0.0f,
+		0.5f, -0.6f, 0.0f,
+		0.4f, -0.9f, 0.0f
 	};
 
-	unsigned int edge[] = { 0, 1 ,3, 0, 2, 3};
+	unsigned int root_tip_index[] = { 0, 1,	1, 1, 1, 0};
 
-	//Bufferに関する処理
-	glsl.vertex_num = sizeof(g_vertex_buffer_data) / sizeof(g_vertex_buffer_data[0]);
-	glsl.index_num = sizeof(edge) / sizeof(edge[0]);
-	glsl.create_vertex_buff(g_vertex_buffer_data, glsl.vertexbuffer, glsl.vertex_num);
-	glsl.create_index_buff(edge, glsl.indexbuffer, glsl.index_num);
+	//前処理
+	//glsl.preprocess(g_vertex_buffer_data, sizeof(g_vertex_buffer_data) / sizeof(g_vertex_buffer_data[0]));
+	glsl.preprocess(g_vertex_buffer_data, sizeof(g_vertex_buffer_data) / sizeof(g_vertex_buffer_data[0]),root_tip_index);
 
 	//描画
 	glLineWidth(10.0);
-	glsl.draw_line(g_vertex_buffer_data, glsl.vertex_num, edge, glsl.index_num);
+	//glsl.draw_line();
 	//glsl.draw_mesh(g_vertex_buffer_data, glsl.vertex_num, edge, glsl.index_num);
-
 	
+	g_vertex_buffer_data[0] += 1.0;
+	glsl.draw_line(g_vertex_buffer_data);
+
 	glutSwapBuffers();
 	glutMainLoop();
 	return 0;

@@ -36,6 +36,44 @@ void Glsl::read_shader(char *name, std::string &out){
 	out = filedata;
 }
 
+void Glsl::preprocess(float *position, int position_num, unsigned int *root_tip_index){
+	//indexの生成
+	std::vector<unsigned int> index;
+	for (int i = 0; i < position_num / 3; i++){
+		index.push_back(i);
+	}
+
+	//Bufferに関する処理
+	this->vertex_num = position_num;
+	this->index_num = index.size();
+	this->create_vertex_buff(position, this->vertexbuffer, this->vertex_num);
+	this->create_index_buff(index.data(), this->indexbuffer, this->index_num);
+	//this->create_strage_buff(root_tip_index, this->stragebuffer, index_num);
+	this->create_uniform_buff(root_tip_index, this->stragebuffer, index_num);
+}
+
+void Glsl::preprocess(float *position, int position_num, unsigned int *index, int index_num){
+	//Bufferに関する処理
+	this->vertex_num = position_num;
+	this->index_num = index_num;
+	this->create_vertex_buff(position, this->vertexbuffer, position_num);
+	this->create_index_buff(index, this->indexbuffer, index_num);
+}
+
+void Glsl::preprocess(float *position, int position_num){
+	//indexの生成
+	std::vector<unsigned int> index;
+	for (int i = 0; i < position_num / 3; i++){
+		index.push_back(i);
+	}
+
+	//Bufferに関する処理
+	this->vertex_num = position_num;
+	this->index_num = index.size();
+	this->create_vertex_buff(position, this->vertexbuffer, this->vertex_num);
+	this->create_index_buff(index.data(), this->indexbuffer, this->index_num);
+}
+
 
 void Glsl::shader_porocess(){
 	//バーテックスシェーダのコンパイル
@@ -67,10 +105,6 @@ void Glsl::shader_porocess(){
 	glAttachShader(programId, vShaderId);
 	glAttachShader(programId, fShaderId);
 	glAttachShader(programId, gShaderId);
-
-	/*glProgramParameteriEXT(programId, GL_GEOMETRY_INPUT_TYPE_EXT, GL_LINES);
-	glProgramParameteriEXT(programId, GL_GEOMETRY_OUTPUT_TYPE_EXT, GL_LINES);
-	glProgramParameteriEXT(programId, GL_GEOMETRY_VERTICES_OUT_EXT, 10);*/
 
 	// リンク
 	GLint linked;
@@ -121,25 +155,51 @@ void Glsl::modify_index_buff(unsigned int *index, unsigned int &buff, int num){
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
+void Glsl::create_strage_buff(unsigned int *strage, unsigned int &buff, int num){
+	GLuint stragebuffer;
+	glGenBuffers(1, &stragebuffer);
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, stragebuffer);
+	glBufferData(GL_SHADER_STORAGE_BUFFER, num * sizeof(GLuint), strage, GL_DYNAMIC_COPY);
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+	buff = stragebuffer;
+}
+
+void Glsl::create_uniform_buff(unsigned int *data, unsigned int &buff, int num){
+	GLuint uniformbuffer;
+	glGenBuffers(1, &uniformbuffer);
+	glBindBuffer(GL_UNIFORM_BUFFER, uniformbuffer);
+	glBufferData(GL_UNIFORM_BUFFER, num * sizeof(GLuint), data, GL_DYNAMIC_DRAW);
+	glBindBuffer(GL_UNIFORM_BUFFER, 0);
+	buff = uniformbuffer;
+}
+
 void Glsl::draw_mesh(float *position, int position_num, unsigned int *index, int index_num){
 	//描画
 	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexbuffer);
 	glEnableClientState(GL_VERTEX_ARRAY);
-
 	glVertexPointer(3, GL_FLOAT, 0, 0);
 	glDrawElements(GL_TRIANGLES, position_num, GL_UNSIGNED_INT, NULL);
 	glDisableClientState(GL_VERTEX_ARRAY);
 }
 
-void Glsl::draw_line(float *position, int position_num, unsigned int *index, int index_num){
-	//描画
-	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexbuffer);
-	glEnableClientState(GL_VERTEX_ARRAY);
+void Glsl::draw_line(float *position){
+	modify_vertex_buff(position, this->vertexbuffer, this->vertex_num);
 
+	//描画
+	glBindBuffer(GL_ARRAY_BUFFER, this->vertexbuffer);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->indexbuffer);
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, this->stragebuffer);
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 5, this->uniformbuffer);
+
+	glEnableClientState(GL_VERTEX_ARRAY);
 	glVertexPointer(3, GL_FLOAT, 0, 0); 
-	glDrawElements(GL_POINTS, position_num, GL_UNSIGNED_INT, NULL);
+	//glDrawElements(GL_LINES, this->vertex_num, GL_UNSIGNED_INT, NULL);
+	glDrawElements(GL_LINE_STRIP, this->vertex_num, GL_UNSIGNED_INT, NULL);
+
 	glDisableClientState(GL_VERTEX_ARRAY);	
 }
 
+void Glsl::LINES(float *position, unsigned int *root_tip_index){
+	this->draw_line(position);
+}
